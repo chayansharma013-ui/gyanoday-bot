@@ -19,7 +19,7 @@ const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
 // --- 2. AI TEACHER BRAIN ---
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ 
-    model: "gemini-1.5-flash",
+    model: "gemini-pro",
     systemInstruction: `
     You are 'Gyanoday AI', the official AI Tutor for Gyanoday Sr. Sec. School, Amet.
 
