@@ -1,4 +1,4 @@
-/* GYANODAY SCHOOL BOT - AI TEACHER VERSION */
+/* GYANODAY SCHOOL BOT - AI TEACHER VERSION (100% FIXED) */
 
 require('dotenv').config();
 const express = require('express');
@@ -39,6 +39,15 @@ async function sendMessage(to, text) {
     try {
         await axios({
             method: "POST",
+            url: `https://graph.facebook.com/v18.0/${PHONE_NUMBER_ID}/messages`,
+            headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}` },
+            data: { messaging_product: "whatsapp", to: to, text: { body: text } }
+        });
+    } catch (error) {
+        console.error("WhatsApp Error:", error.response ? error.response.data : error.message);
+    }
+}
+
 // --- 4. SERVER ROUTES ---
 app.get('/webhook', (req, res) => {
     if (req.query['hub.mode'] === 'subscribe' && req.query['hub.verify_token'] === VERIFY_TOKEN) {
@@ -47,7 +56,7 @@ app.get('/webhook', (req, res) => {
 });
 
 app.post('/webhook', async (req, res) => {
-    // 🔥 PERMANENT FIX 1: Meta को तुरंत 200 OK भेजें ताकि वो दोबारा मैसेज (Retry) ना भेजे!
+    // 🔥 PERMANENT FIX 1: Meta को तुरंत 200 OK
     res.sendStatus(200);
 
     const body = req.body;
@@ -55,7 +64,7 @@ app.post('/webhook', async (req, res) => {
         if (body.entry && body.entry[0].changes && body.entry[0].changes[0].value.messages) {
             const message = body.entry[0].changes[0].value.messages[0];
             
-            // 🔥 PERMANENT FIX 2: सिर्फ 'Text' मैसेज पर ही रिप्लाई करे (Sticker, Photo, या Status पर क्रैश न हो)
+            // 🔥 PERMANENT FIX 2: सिर्फ 'Text' मैसेज पर रिप्लाई
             if (message.type !== 'text') {
                 console.log("Ignored non-text message.");
                 return; 
@@ -67,7 +76,6 @@ app.post('/webhook', async (req, res) => {
             console.log(`Msg from ${from}: ${msgBody}`);
 
             try {
-                // AI को सोचने दें और आराम से रिप्लाई भेजें (Meta अब इंतज़ार नहीं कर रहा)
                 const chat = model.startChat();
                 const result = await chat.sendMessage(msgBody);
                 await sendMessage(from, result.response.text());
@@ -76,28 +84,6 @@ app.post('/webhook', async (req, res) => {
             }
         }
     }
-});
-
-app.listen(PORT, () => console.log(`Gyanoday Bot is Live on Port ${PORT}`));
-    const body = req.body;
-    if (body.object) {
-        if (body.entry && body.entry[0].changes && body.entry[0].changes[0].value.messages) {
-            const message = body.entry[0].changes[0].value.messages[0];
-            const from = message.from; 
-            const msgBody = message.text.body;
-
-            console.log(`Msg from ${from}: ${msgBody}`);
-
-            try {
-                const chat = model.startChat();
-                const result = await chat.sendMessage(msgBody);
-                await sendMessage(from, result.response.text());
-            } catch (e) {
-                console.error("AI Error:", e);
-            }
-        }
-        res.sendStatus(200);
-    } else { res.sendStatus(404); }
 });
 
 app.listen(PORT, () => console.log(`Gyanoday Bot is Live on Port ${PORT}`));
